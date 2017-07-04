@@ -40,23 +40,18 @@ stdenv_multi.mkDerivation {
     ln -s ${qt58.full}/bin tools/Qt5.8.0/5.8/gcc_64/bin
   '';
 
-  # IGNORE_MISSING_TOOLCHAIN = true;
-
   buildPhase = ''
     export PACKAGE_DIR="$out"
     runHook preBuild
-    make simulation
-    make gcs
-    # make fw_seppuku
-    # make ef_seppuku
-    make package_installer
+
+    make simulation -j $NIX_BUILD_CORES
+    make gcs -j $NIX_BUILD_CORES V=1
+    make package_flight -j $NIX_BUILD_CORES
+    make package_all_compress
   '';
 
   installPhase = ''
-    mkdir -p $out
-    false
-    # mv build/uku/*.tlfw $out
-    # mv build/uku/*.hex $out
+    cp -r build/package-linux_*-dirty/dronin_linux_*-dirty $out
   '';
 
   buildInputs = with qt58; [
@@ -64,17 +59,10 @@ stdenv_multi.mkDerivation {
 
     zlib
     libudev
-    # qbs
-    # qt58.full
-    # qttools
-    # qtbase
-    # qtbase
-    # qtcharts
-    # qtimageformats
-    # qtmultimedia
-    # qtquickcontrols
-    # qtserialport
-    # qtsvg
-    # qttools
+    zip
+    unzip
+    file
+    dpkg
+    fakeroot
   ];
 }

@@ -631,7 +631,7 @@ define SIM_TEMPLATE
 
 .PHONY: sim
 sim: TARGET=sim
-sim: OUTDIR=$(BUILD_DIR)/$$(TARGET)
+sim: OUTDIR=$(BUILD_DIR)/$$(TARGET)$(SIMSUFFIX)
 sim: BOARD_ROOT_DIR=$(ROOT_DIR)/flight/targets/$(1)
 sim: $(UAVOBJECT_MARKER)
 	$(V1) mkdir -p $$(OUTDIR)/dep
