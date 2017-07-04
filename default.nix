@@ -2,7 +2,12 @@
 
 with pkgs;
 
-stdenv.mkDerivation {
+let
+  stdenv_multi = overrideCC stdenv gcc_multi;
+
+in
+
+stdenv_multi.mkDerivation {
   name = "dRonin";
 
   src = ./.;
@@ -16,6 +21,13 @@ stdenv.mkDerivation {
     git
   ];
 
+  postPatch = ''
+    # The simulator builds as a 32 bit executable, make the 32 bit library and
+    # header available as $NIX_LDFLAGS contains only 64-bit ones.
+    substituteInPlace flight/PiOS/posix/library.mk --replace '-m32' \
+      '-m32 -L${stdenv_multi.cc.libc.out}/lib/32 -I${stdenv_multi.cc.libc.dev}/include'
+  '';
+
   preBuild = ''
     mkdir -p tools
     ln -s ${gcc-arm-embedded} tools/gcc-arm-none-eabi-5_2-2015q4
@@ -24,8 +36,8 @@ stdenv.mkDerivation {
     ln -s ${breakpad} tools/breakpad/20170224
 
     mkdir -p tools/Qt5.8.0/5.8/gcc_64
-    ln -s $NIX_BUILD_TOP/__nix_qt5__/lib/qt-5.8/plugins tools/Qt5.8.0/5.8/gcc_64/
-    ln -s $NIX_BUILD_TOP/__nix_qt5__/bin tools/Qt5.8.0/5.8/gcc_64/
+    ln -s ${qt58.full}/lib/qt5/* tools/Qt5.8.0/5.8/gcc_64/
+    ln -s ${qt58.full}/bin tools/Qt5.8.0/5.8/gcc_64/bin
   '';
 
   # IGNORE_MISSING_TOOLCHAIN = true;
@@ -33,29 +45,36 @@ stdenv.mkDerivation {
   buildPhase = ''
     export PACKAGE_DIR="$out"
     runHook preBuild
-    # make gcs
-    make fw_seppuku
-    make ef_seppuku
-    # make package_installer
+    make simulation
+    make gcs
+    # make fw_seppuku
+    # make ef_seppuku
+    make package_installer
   '';
 
   installPhase = ''
     mkdir -p $out
-    mv build/uku/*.tlfw $out
-    mv build/uku/*.hex $out
+    false
+    # mv build/uku/*.tlfw $out
+    # mv build/uku/*.hex $out
   '';
 
   buildInputs = with qt58; [
     breakpad
 
-    qbs
-    qtbase
-    qtcharts
-    qtimageformats
-    qtmultimedia
-    qtquickcontrols
-    qtserialport
-    qtsvg 
-    qttools
+    zlib
+    libudev
+    # qbs
+    # qt58.full
+    # qttools
+    # qtbase
+    # qtbase
+    # qtcharts
+    # qtimageformats
+    # qtmultimedia
+    # qtquickcontrols
+    # qtserialport
+    # qtsvg
+    # qttools
   ];
 }
