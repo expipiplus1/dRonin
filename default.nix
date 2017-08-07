@@ -3,6 +3,7 @@
 with pkgs;
 
 let
+  # The simulator is a 32 bit executable
   stdenv_multi = overrideCC stdenv gcc_multi;
 
 in
@@ -19,6 +20,17 @@ stdenv_multi.mkDerivation {
     python2
     gcc-arm-embedded
     git
+    zip
+    unzip
+    file
+    dpkg
+    fakeroot
+  ];
+
+  buildInputs = with qt58; [
+    breakpad
+    zlib
+    libudev
   ];
 
   postPatch = ''
@@ -45,24 +57,13 @@ stdenv_multi.mkDerivation {
     runHook preBuild
 
     make simulation -j $NIX_BUILD_CORES
-    make gcs -j $NIX_BUILD_CORES V=1
+    make gcs -j $NIX_BUILD_CORES
     make package_flight -j $NIX_BUILD_CORES
     make package_all_compress
   '';
 
   installPhase = ''
-    cp -r build/package-linux_*-dirty/dronin_linux_*-dirty $out
+    cp -r build/package-linux_*-dirty/dronin_linux_*-dirty "$out"
+    cp -r build/package-linux_*-dirty/rules.udev "$out"
   '';
-
-  buildInputs = with qt58; [
-    breakpad
-
-    zlib
-    libudev
-    zip
-    unzip
-    file
-    dpkg
-    fakeroot
-  ];
 }
