@@ -66,4 +66,15 @@ stdenv_multi.mkDerivation {
     cp -r build/package-linux_*-dirty/dronin_linux_*-dirty "$out"
     cp -r build/package-linux_*-dirty/rules.udev "$out"
   '';
+
+  meta = {
+    description = "An autopilot/flight controller firmware for controllers in the OpenPilot/Tau Labs family";
+    longDescription = ''
+      dRonin is an autopilot/flight controller firmware for controllers in the OpenPilot/Tau Labs family. It's aimed at a variety of use cases: acro/racing, autonomous flight, and vehicle research.
+    '';
+    homepage = https://dronin.org;
+    license = stdenv.lib.licenses.gpl3;
+    maintainers = [ stdenv.lib.maintainers.expipiplus1 ];
+    platforms = stdenv.lib.platforms.linux;
+  };
 }
